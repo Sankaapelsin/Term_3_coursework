@@ -4,7 +4,7 @@ import datetime
 
 def loads():
     """Открываем файл с данными и читаем его"""
-    with open("data/operations.json", "r", encoding='utf8') as file:
+    with open(r"C:\Users\User\Desktop\PyCharm_Projects\Term's_work_3\data\operations.json", "r", encoding='utf8') as file:
         operations = json.load(file)
         return operations
 
@@ -43,40 +43,79 @@ def date_formatting():
     return data
 
 
-def secure_for_card_number():
-    """Функция для шифрования (скрытия) данных карты или счета,
-      возвращает данные об последних пяти операциях
-      с зашифрованныии данными и отформатированной датой"""
+def for_from_card_and_account_coding():
+    """Функция для шифрования (скрытия) данных карты или
+        счета отправителя, возвращает данные об последних пяти
+        операциях с зашифрованныии данными и отформатированной датой"""
     data = date_formatting()
     for operation in data:
-        if operation['description'] == 'Открытие вклада' or operation['description'] == 'Перевод организации':
-            secure_count = 'Счет **' + operation['to'][-4:]
-            operation['to'] = secure_count
-        elif operation['description'] == 'Перевод организации':
-            i = 0  # Cчетчик для отсчета каждой 4 цифры в номере карты
-            j = 0  # Счетчик для отсчета каждой цифры в номере карты
-            array2 = []
-            array = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
-            for characters in operation['from']:
-                if characters in array:
-                    j += 1
+        if operation['description'] == 'Открытие вклада':
+            pass
+        else:
+            if 'Счет' in operation['from']:
+                secure_account = 'Счет **' + operation['from'][-4:]
+                operation['from'] = secure_account
+            else:
+                card_number = operation['from'].split()[-1]
+                i = 0
+                j = 1
+                array = []
+                for character in card_number:
+                    if j == 4:
+                        if 5 < i < 12:
+                            character = '*'
+                        j = 0
+                        character = character + ' '
+                    elif 5 < i < 12:
+                        character = '*'
                     i += 1
-                    if j in range(7, 13):
-                        characters = '*'
-                    else:
-                        pass
-                    if i == 4:
-                        characters += ' '
-                        array2.append(characters)
-                        i = 0
-                    else:
-                        array2.append(characters)
-                else:
-                    array2.append(characters)
-            operation['from'] = ''.join(array2)
-        elif operation['description'] == 'Перевод со счета на счет':
-            secure_count_to = 'Счет **' + operation['to'][-4:]
-            secure_count_from = 'Счет **' + operation['from'][-4:]
-            operation['to'] = secure_count_to
-            operation['from'] = secure_count_from
+                    j += 1
+                    array.append(character)
+                secured_number = ''.join(array)
+                operation['from'] = ' '.join(operation['from'].split()[:-1]) + ' ' + secured_number
     return data
+
+
+def securing_card_and_account_to():
+    """Функция для шифрования (скрытия) данных карты или
+    счета получателя, возвращает данные об последних пяти
+    операциях с зашифрованныии данными и отформатированной датой"""
+    data = for_from_card_and_account_coding()
+    for operation in data:
+        if 'Счет' in operation['to']:
+            secure_account = 'Счет **' + operation['to'][-4:]
+            operation['to'] = secure_account
+        else:
+            card_number = operation['to'].split()[-1]
+            i = 0
+            j = 1
+            array = []
+            for character in card_number:
+                if j == 4:
+                    if 5 < i < 12:
+                        character = '*'
+                    j = 0
+                    character = character + ' '
+                elif 5 < i < 12:
+                    character = '*'
+                i += 1
+                j += 1
+                array.append(character)
+            secured_number = ''.join(array)
+            operation['to'] = ' '.join(operation['to'].split()[:-1]) + ' ' + secured_number
+    return data
+
+
+def function_for_showing():
+    """Функция ,которая возвращает данные об последних пяти операциях
+      с зашифрованныии данными и отформатированной датой"""
+    data = securing_card_and_account_to()
+    for operations in data:
+        if operations['description'] == 'Открытие вклада':
+            print(f"{operations['date']} {operations['description']}\n{operations['to']}\n"
+                  f"{operations['operationAmount']['amount']} {operations['operationAmount']['currency']['name']}\n")
+        else:
+            print(f"{operations['date']} {operations['description']}\n"
+                  f"{operations['from']} --> {operations['to']}\n"
+                  f"{operations['operationAmount']['amount']} "
+                  f"{operations['operationAmount']['currency']['name']}\n")
