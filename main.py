@@ -1,16 +1,10 @@
-from src.utils import secure_for_card_number
+from src.utils import function_for_showing
 
 
 def main():
     """Основная функция, реализующая вывод информации в необходимом виде"""
-    data = secure_for_card_number()
-    for operations in data:
-        if operations['description'] == 'Открытие вклада':
-            print(f"{operations['date']} {operations['description']}\n {operations['to']}\n"
-                  f"{operations['operationAmount']['amount']} {operations['operationAmount']['currency']['name']}")
-        else:
-            print(f"{operations['date']} {operations['description']}\n{operations['from']} -> {operations['to']}\n"
-                  f"{operations['operationAmount']['amount']} {operations['operationAmount']['currency']['name']}")
+    function_for_showing()
 
 
 main()
+
